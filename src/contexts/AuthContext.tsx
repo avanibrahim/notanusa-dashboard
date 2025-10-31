@@ -1,20 +1,17 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 
-// Dummy type biar gak error
-type Profile = {
+interface User {
+  id?: string;
+  email?: string;
+}
+
+interface Profile {
   id?: string;
   full_name?: string;
   business_name?: string;
   role?: string;
-};
+}
 
-// Gak perlu import dari '@supabase/supabase-js' karena kita belum pakai Supabase
-type User = {
-  id?: string;
-  email?: string;
-};
-
-// Interface context
 interface AuthContextType {
   user: User | null;
   profile: Profile | null;
@@ -24,23 +21,34 @@ interface AuthContextType {
   signOut: () => Promise<void>;
 }
 
-// Buat context
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-// Provider
-export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
+export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(false);
 
+  // Dummy auth, biar ga error
   useEffect(() => {
-    // Karena gak pakai Supabase dulu, biarkan kosong
     setLoading(false);
   }, []);
 
-  const signIn = async () => {};
-  const signUp = async () => {};
-  const signOut = async () => {};
+  const signIn = async (email: string, password: string) => {
+    console.log('signIn dummy', email, password);
+    setUser({ id: '1', email });
+  };
+
+  const signUp = async (email: string, password: string, fullName: string, businessName?: string) => {
+    console.log('signUp dummy', { email, password, fullName, businessName });
+    setUser({ id: '1', email });
+    setProfile({ id: '1', full_name: fullName, business_name: businessName, role: 'user' });
+  };
+
+  const signOut = async () => {
+    console.log('signOut dummy');
+    setUser(null);
+    setProfile(null);
+  };
 
   return (
     <AuthContext.Provider value={{ user, profile, loading, signIn, signUp, signOut }}>
@@ -49,10 +57,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   );
 };
 
-// Hook
 export const useAuth = () => {
   const context = useContext(AuthContext);
-  if (context === undefined) {
+  if (!context) {
     throw new Error('useAuth must be used within an AuthProvider');
   }
   return context;
